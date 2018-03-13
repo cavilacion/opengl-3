@@ -123,9 +123,9 @@ private:
     void updateProjectionTransform();
     void updateModelTransforms();
 
-    void updateNormalUniforms();
-    void updateGouraudUniforms();
-    void updatePhongUniforms();
+    void updateNormalUniforms(GLuint idx);
+    void updateGouraudUniforms(GLuint idx);
+    void updatePhongUniforms(GLuint idx);
 
     // Useful utility method to convert image to bytes.
     QVector<quint8> imageToBytes(QImage image);

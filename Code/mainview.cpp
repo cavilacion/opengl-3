@@ -31,7 +31,7 @@ MainView::~MainView() {
 
     qDebug() << "MainView destructor";
 
-    glDeleteTextures(1, &texturePtr);
+    glDeleteTextures(numObjects, texturePtr);
 
     destroyModelBuffers();
 }
@@ -68,11 +68,28 @@ void MainView::initializeGL() {
     glClearColor(0.0, 1.0, 0.0, 1.0);
 
     createShaderProgram();
-    loadMesh();
-    loadTextures();
+    loadObjects();
 
     // Initialize transformations
     updateProjectionTransform();
+
+
+    timer.start(1000.0/60.0);
+}
+
+void MainView::loadObjects ()
+{
+    numObjects = 1;
+    object = new Object[numObjects];
+    meshVBO = new GLuint[numObjects];
+    meshVAO = new GLuint[numObjects];
+    texturePtr = new GLuint[numObjects];
+    glGenBuffers(numObjects, meshVBO);
+    glGenVertexArrays(numObjects, meshVAO);
+    glGenTextures(numObjects, texturePtr);
+    meshSize = new GLuint[numObjects];
+    loadMesh (":/models/cat.obj", 0);
+    loadTexture (":/textures/cat_diff.png", texturePtr[0]);
     updateModelTransforms();
 }
 
@@ -123,21 +140,19 @@ void MainView::createShaderProgram()
     uniformTextureSamplerPhong      = phongShaderProgram.uniformLocation("textureSampler");
 }
 
-void MainView::loadMesh()
+void MainView::loadMesh(const char *path, GLuint idx)
 {
-    Model model(":/models/cat.obj");
+    Model model(path);
     model.unitize();
     QVector<float> meshData = model.getVNTInterleaved();
+    qDebug() << "Arrived here";
+    this->meshSize[idx] = model.getVertices().size();
+    qDebug() << "Ander here";
+    // Bind VAO
+    glBindVertexArray(meshVAO[idx]);
 
-    this->meshSize = model.getVertices().size();
-
-    // Generate VAO
-    glGenVertexArrays(1, &meshVAO);
-    glBindVertexArray(meshVAO);
-
-    // Generate VBO
-    glGenBuffers(1, &meshVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, meshVBO);
+    // Bind VBO
+    glBindBuffer(GL_ARRAY_BUFFER, meshVBO[idx]);
 
     // Write the data to the buffer
     glBufferData(GL_ARRAY_BUFFER, meshData.size() * sizeof(float), meshData.data(), GL_STATIC_DRAW);
@@ -156,12 +171,6 @@ void MainView::loadMesh()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-}
-
-void MainView::loadTextures()
-{
-    glGenTextures(1, &texturePtr);
-    loadTexture(":/textures/cat_diff.png", texturePtr);
 }
 
 void MainView::loadTexture(QString file, GLuint texturePtr)
@@ -214,13 +223,15 @@ void MainView::paintGL() {
         break;
     }
 
-    // Set the texture and draw the mesh.
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texturePtr);
+    // Set all textures and draw the meshes.
+    for (GLuint idx = 0; idx < numObjects; ++idx)
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texturePtr[idx]);
 
-    glBindVertexArray(meshVAO);
-    glDrawArrays(GL_TRIANGLES, 0, meshSize);
-
+        glBindVertexArray(meshVAO[idx]);
+        glDrawArrays(GL_TRIANGLES, 0, meshSize[idx]);
+    }
     shaderProgram->release();
 }
 
@@ -242,15 +253,15 @@ void MainView::resizeGL(int newWidth, int newHeight)
 void MainView::updateNormalUniforms()
 {
     glUniformMatrix4fv(uniformProjectionTransformNormal, 1, GL_FALSE, projectionTransform.data());
-    glUniformMatrix4fv(uniformModelViewTransformNormal, 1, GL_FALSE, meshTransform.data());
-    glUniformMatrix3fv(uniformNormalTransformNormal, 1, GL_FALSE, meshNormalTransform.data());
+    glUniformMatrix4fv(uniformModelViewTransformNormal, 1, GL_FALSE, object[0].meshTransform.data());
+    glUniformMatrix3fv(uniformNormalTransformNormal, 1, GL_FALSE, object[0].meshNormalTransform.data());
 }
 
 void MainView::updateGouraudUniforms()
 {
     glUniformMatrix4fv(uniformProjectionTransformGouraud, 1, GL_FALSE, projectionTransform.data());
-    glUniformMatrix4fv(uniformModelViewTransformGouraud, 1, GL_FALSE, meshTransform.data());
-    glUniformMatrix3fv(uniformNormalTransformGouraud, 1, GL_FALSE, meshNormalTransform.data());
+    glUniformMatrix4fv(uniformModelViewTransformGouraud, 1, GL_FALSE, object[0].meshTransform.data());
+    glUniformMatrix3fv(uniformNormalTransformGouraud, 1, GL_FALSE, object[0].meshNormalTransform.data());
 
     glUniform4fv(uniformMaterialGouraud, 1, &material[0]);
     glUniform3fv(uniformLightPositionGouraud, 1, &lightPosition[0]);
@@ -262,8 +273,8 @@ void MainView::updateGouraudUniforms()
 void MainView::updatePhongUniforms()
 {
     glUniformMatrix4fv(uniformProjectionTransformPhong, 1, GL_FALSE, projectionTransform.data());
-    glUniformMatrix4fv(uniformModelViewTransformPhong, 1, GL_FALSE, meshTransform.data());
-    glUniformMatrix3fv(uniformNormalTransformPhong, 1, GL_FALSE, meshNormalTransform.data());
+    glUniformMatrix4fv(uniformModelViewTransformPhong, 1, GL_FALSE, object[0].meshTransform.data());
+    glUniformMatrix3fv(uniformNormalTransformPhong, 1, GL_FALSE, object[0].meshNormalTransform.data());
 
     glUniform4fv(uniformMaterialPhong, 1, &material[0]);
     glUniform3fv(uniformLightPositionPhong, 1, &lightPosition[0]);
@@ -281,12 +292,14 @@ void MainView::updateProjectionTransform()
 
 void MainView::updateModelTransforms()
 {
-    meshTransform.setToIdentity();
-    meshTransform.translate(0, 0, -4);
-    meshTransform.scale(scale);
-    meshTransform.rotate(QQuaternion::fromEulerAngles(rotation));
-    meshNormalTransform = meshTransform.normalMatrix();
-
+    for (GLuint idx = 0 ; idx < numObjects ; ++idx)
+    {
+        object[idx].meshTransform.setToIdentity();
+        object[idx].meshTransform.translate(0, 0, -4);
+        object[idx].meshTransform.scale(scale);
+        object[idx].meshTransform.rotate(QQuaternion::fromEulerAngles(object[idx].rotation));
+        object[idx].meshNormalTransform = object[idx].meshTransform.normalMatrix();
+    }
     update();
 }
 
@@ -294,15 +307,18 @@ void MainView::updateModelTransforms()
 
 void MainView::destroyModelBuffers()
 {
-    glDeleteBuffers(1, &meshVBO);
-    glDeleteVertexArrays(1, &meshVAO);
+    glDeleteBuffers(numObjects, meshVBO);
+    glDeleteVertexArrays(numObjects, meshVAO);
 }
 
 // --- Public interface
 
 void MainView::setRotation(int rotateX, int rotateY, int rotateZ)
 {
-    rotation = { static_cast<float>(rotateX), static_cast<float>(rotateY), static_cast<float>(rotateZ) };
+    for (GLuint idx = 0 ; idx < numObjects ; ++idx)
+    {
+        object[idx].rotation = { static_cast<float>(rotateX), static_cast<float>(rotateY), static_cast<float>(rotateZ) };
+    }
     updateModelTransforms();
 }
 

@@ -16,6 +16,8 @@
 #include <memory>
 #include <QMatrix4x4>
 
+#include "object.h"
+
 class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     Q_OBJECT
 
@@ -53,20 +55,20 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
 
     GLint uniformTextureSamplerPhong;
 
+    GLuint numObjects;
+
     // Buffers
-    GLuint meshVAO;
-    GLuint meshVBO;
-    GLuint meshSize;
+    GLuint *meshVAO;
+    GLuint *meshVBO;
+    GLuint *meshSize;
 
     // Texture
-    GLuint texturePtr;
+    GLuint *texturePtr;
 
-    // Transforms
+    // Transform structures
+    Object *object;
     float scale = 1.f;
-    QVector3D rotation;
     QMatrix4x4 projectionTransform;
-    QMatrix3x3 meshNormalTransform;
-    QMatrix4x4 meshTransform;
 
     // Phong model constants.
     QVector4D material = {0.5, 0.5, 1, 5};
@@ -91,6 +93,7 @@ protected:
     void initializeGL();
     void resizeGL(int newWidth, int newHeight);
     void paintGL();
+    void loadObjects();
 
     // Functions for keyboard input events
     void keyPressEvent(QKeyEvent *ev);
@@ -108,10 +111,9 @@ private slots:
 
 private:
     void createShaderProgram();
-    void loadMesh();
+    void loadMesh(const char *path, GLuint idx);
 
     // Loads texture data into the buffer of texturePtr.
-    void loadTextures();
     void loadTexture(QString file, GLuint texturePtr);
 
     void destroyModelBuffers();

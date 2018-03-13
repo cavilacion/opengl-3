@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+int curX, curY, curZ;
+
 // Triggered by pressing a key
 void MainView::keyPressEvent(QKeyEvent *ev)
 {
@@ -45,6 +47,9 @@ void MainView::mouseMoveEvent(QMouseEvent *ev)
 {
     qDebug() << "x" << ev->x() << "y" << ev->y();
 
+    int xDiff = curX - ev->x();
+    int yDiff = curX - ev->y();
+
     update();
 }
 
@@ -52,6 +57,9 @@ void MainView::mouseMoveEvent(QMouseEvent *ev)
 void MainView::mousePressEvent(QMouseEvent *ev)
 {
     qDebug() << "Mouse button pressed:" << ev->button();
+
+    curX = ev->x();
+    curY = ev->y();
 
     update();
     // Do not remove the line below, clicking must focus on this widget!

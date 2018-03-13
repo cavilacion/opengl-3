@@ -68,6 +68,8 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     // Transform structures
     Object *object;
     float scale = 1.f;
+    QVector3D rotation;
+    QVector3D viewRotation;
     QMatrix4x4 projectionTransform;
 
     // Phong model constants.

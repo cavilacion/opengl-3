@@ -14,5 +14,6 @@
         <file>shaders/fragshader_phong.glsl</file>
         <file>shaders/fragshader_normal.glsl</file>
         <file>shaders/fragshader_gouraud.glsl</file>
+        <file>../grid.obj</file>
     </qresource>
 </RCC>

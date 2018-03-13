@@ -288,6 +288,7 @@ void MainView::updateProjectionTransform()
     float aspect_ratio = static_cast<float>(width()) / static_cast<float>(height());
     projectionTransform.setToIdentity();
     projectionTransform.perspective(60, aspect_ratio, 0.2, 20);
+    projectionTransform.rotate(QQuaternion::fromEulerAngles(viewRotation));
 }
 
 void MainView::updateModelTransforms()

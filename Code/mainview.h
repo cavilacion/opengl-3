@@ -71,11 +71,15 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     QVector3D rotation;
     QVector3D viewRotation;
     QMatrix4x4 projectionTransform;
+    QMatrix4x4 viewTransform;
 
     // Phong model constants.
     QVector4D material = {0.5, 0.5, 1, 5};
     QVector3D lightPosition = {1, 100, 1};
     QVector3D lightColour = {1, 1, 1};
+
+    float mouseScale = 0.001;
+    float zoom = -4;
 
 public:
     enum ShadingMode : GLuint
@@ -88,6 +92,8 @@ public:
 
     // Functions for widget input events
     void setRotation(int rotateX, int rotateY, int rotateZ);
+    void setViewRotation(float rotateX, float rotateY, float rotateZ);
+    void updateViewDistance(float dist);
     void setScale(int scale);
     void setShadingMode(ShadingMode shading);
 
@@ -122,6 +128,7 @@ private:
 
     void updateProjectionTransform();
     void updateModelTransforms();
+    void updateViewTransform();
 
     void updateNormalUniforms(GLuint idx);
     void updateGouraudUniforms(GLuint idx);

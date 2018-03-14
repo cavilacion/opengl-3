@@ -14,6 +14,9 @@
         <file>shaders/fragshader_phong.glsl</file>
         <file>shaders/fragshader_normal.glsl</file>
         <file>shaders/fragshader_gouraud.glsl</file>
-        <file>../grid.obj</file>
+        <file>textures/wood1.jpg</file>
+        <file>models/boat.obj</file>
+        <file>textures/wood2.jpg</file>
+        <file>models/grid.obj</file>
     </qresource>
 </RCC>

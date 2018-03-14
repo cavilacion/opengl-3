@@ -16,6 +16,7 @@ MainView::MainView(QWidget *parent) : QOpenGLWidget(parent) {
     qDebug() << "MainView constructor";
 
     connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
+    viewTransform.translate(0, 0, -4);
 }
 
 /**
@@ -70,6 +71,16 @@ void MainView::initializeGL() {
     createShaderProgram();
     loadObjects();
 
+    // Specify object movement
+    object[0].rotationSpeed = 1.5;
+    object[1].rotationSpeed = 1.0;
+    object[2].rotationSpeed = 1.0;
+    object[3].rotationSpeed = 1.3;
+    object[0].scale = 1.2;
+    object[1].scale = 0.5;
+    object[2].scale = 1.1;
+    object[3].scale = 0.9;
+
     // Initialize transformations
     updateProjectionTransform();
 
@@ -79,7 +90,7 @@ void MainView::initializeGL() {
 
 void MainView::loadObjects ()
 {
-    numObjects = 2;
+    numObjects = 4;
     object = new Object[numObjects];
     meshVBO = new GLuint[numObjects];
     meshVAO = new GLuint[numObjects];
@@ -90,8 +101,13 @@ void MainView::loadObjects ()
     meshSize = new GLuint[numObjects];
     loadMesh (":/models/cat.obj", 1);
     loadMesh (":/models/cat.obj", 0);
+    loadMesh (":/models/sphere.obj", 2);
+    loadMesh (":/models/sphere.obj", 3);
     loadTexture (":/textures/cat_diff.png", texturePtr[0]);
     loadTexture (":/textures/cat_spec.png", texturePtr[1]);
+    loadTexture (":/textures/wood1.jpg", texturePtr[2]);
+    loadTexture (":/textures/wood2.jpg", texturePtr[3]);
+
     updateModelTransforms();
 }
 
@@ -205,6 +221,9 @@ void MainView::paintGL() {
     glClearColor(0.2f, 0.5f, 0.7f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    updateModelTransforms();
+    updateViewTransform();
+
     // Choose the selected shader.
     QOpenGLShaderProgram *shaderProgram;
     switch (currentShader) {
@@ -256,16 +275,20 @@ void MainView::resizeGL(int newWidth, int newHeight)
 
 void MainView::updateNormalUniforms(GLuint idx)
 {
+    auto modelViewMatrix = viewTransform * object[idx].meshTransform;
+
     glUniformMatrix4fv(uniformProjectionTransformNormal, 1, GL_FALSE, projectionTransform.data());
-    glUniformMatrix4fv(uniformModelViewTransformNormal, 1, GL_FALSE, object[idx].meshTransform.data());
-    glUniformMatrix3fv(uniformNormalTransformNormal, 1, GL_FALSE, object[idx].meshNormalTransform.data());
+    glUniformMatrix4fv(uniformModelViewTransformNormal, 1, GL_FALSE, modelViewMatrix.data());
+    glUniformMatrix3fv(uniformNormalTransformNormal, 1, GL_FALSE, modelViewMatrix.normalMatrix().data());
 }
 
 void MainView::updateGouraudUniforms(GLuint idx)
 {
+    auto modelViewMatrix = viewTransform * object[idx].meshTransform;
+
     glUniformMatrix4fv(uniformProjectionTransformGouraud, 1, GL_FALSE, projectionTransform.data());
-    glUniformMatrix4fv(uniformModelViewTransformGouraud, 1, GL_FALSE, object[idx].meshTransform.data());
-    glUniformMatrix3fv(uniformNormalTransformGouraud, 1, GL_FALSE, object[idx].meshNormalTransform.data());
+    glUniformMatrix4fv(uniformModelViewTransformGouraud, 1, GL_FALSE,  modelViewMatrix.data());
+    glUniformMatrix3fv(uniformNormalTransformGouraud, 1, GL_FALSE, modelViewMatrix.normalMatrix().data());
 
     glUniform4fv(uniformMaterialGouraud, 1, &material[0]);
     glUniform3fv(uniformLightPositionGouraud, 1, &lightPosition[0]);
@@ -276,9 +299,11 @@ void MainView::updateGouraudUniforms(GLuint idx)
 
 void MainView::updatePhongUniforms(GLuint idx)
 {
+    auto modelViewMatrix = viewTransform * object[idx].meshTransform;
+
     glUniformMatrix4fv(uniformProjectionTransformPhong, 1, GL_FALSE, projectionTransform.data());
-    glUniformMatrix4fv(uniformModelViewTransformPhong, 1, GL_FALSE, object[idx].meshTransform.data());
-    glUniformMatrix3fv(uniformNormalTransformPhong, 1, GL_FALSE, object[idx].meshNormalTransform.data());
+    glUniformMatrix4fv(uniformModelViewTransformPhong, 1, GL_FALSE,  modelViewMatrix.data());
+    glUniformMatrix3fv(uniformNormalTransformPhong, 1, GL_FALSE, modelViewMatrix.normalMatrix().data());
 
     glUniform4fv(uniformMaterialPhong, 1, &material[0]);
     glUniform3fv(uniformLightPositionPhong, 1, &lightPosition[0]);
@@ -299,13 +324,24 @@ void MainView::updateModelTransforms()
 {
     for (GLuint idx = 0 ; idx < numObjects ; ++idx)
     {
+        object[idx].rotation.setY(object[idx].rotation.y() + object[idx].rotationSpeed);
+
         object[idx].meshTransform.setToIdentity();
-        object[idx].meshTransform.translate(idx*2, 0, -4);
-        object[idx].meshTransform.scale(scale);
+        object[idx].meshTransform.translate(idx*2, 0, 0);
+        object[idx].meshTransform.scale(object[idx].scale);
         object[idx].meshTransform.rotate(QQuaternion::fromEulerAngles(object[idx].rotation));
         object[idx].meshNormalTransform = object[idx].meshTransform.normalMatrix();
     }
     update();
+}
+
+void MainView::updateViewTransform()
+{
+    viewRotation.setY( viewRotation.y() + 0.1);
+
+    viewTransform.setToIdentity();
+    viewTransform.translate(0, 0, zoom);
+    viewTransform.rotate(QQuaternion::fromEulerAngles(viewRotation));
 }
 
 // --- OpenGL cleanup helpers
@@ -325,6 +361,22 @@ void MainView::setRotation(int rotateX, int rotateY, int rotateZ)
         object[idx].rotation = { static_cast<float>(rotateX), static_cast<float>(rotateY), static_cast<float>(rotateZ) };
     }
     updateModelTransforms();
+}
+
+void MainView::setViewRotation(float rotateX, float rotateY, float rotateZ)
+{
+    viewRotation.setX( viewRotation.x() + rotateX);
+    viewRotation.setY( viewRotation.y() + rotateY);
+    viewRotation.setZ( viewRotation.z() + rotateZ);
+
+    updateViewTransform();
+}
+
+void MainView::updateViewDistance(float dist)
+{
+    zoom += 0.001*dist;
+
+    updateViewTransform();
 }
 
 void MainView::setScale(int newScale)

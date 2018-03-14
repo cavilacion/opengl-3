@@ -2,7 +2,7 @@
 
 #include <QDebug>
 
-int curX, curY, curZ;
+int curX, curY;
 
 // Triggered by pressing a key
 void MainView::keyPressEvent(QKeyEvent *ev)
@@ -48,7 +48,14 @@ void MainView::mouseMoveEvent(QMouseEvent *ev)
     qDebug() << "x" << ev->x() << "y" << ev->y();
 
     int xDiff = curX - ev->x();
-    int yDiff = curX - ev->y();
+    int yDiff = curY - ev->y();
+
+//    int max = xDiff > yDiff ? xDiff : yDiff;
+//    if(xDiff == max)
+//        setViewRotation(0, xDiff, 0);
+//    else
+//        setViewRotation(yDiff, 0, 0);
+    setViewRotation(mouseScale * yDiff, mouseScale * xDiff, 0);
 
     update();
 }
@@ -79,6 +86,7 @@ void MainView::wheelEvent(QWheelEvent *ev)
 {
     // Implement something
     qDebug() << "Mouse wheel:" << ev->delta();
+    updateViewDistance(ev->delta());
 
     update();
 }

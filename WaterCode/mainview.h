@@ -30,6 +30,12 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     GLint uniformModelViewTransformNormal;
     GLint uniformProjectionTransformNormal;
     GLint uniformNormalTransformNormal;
+    GLint uniformNumWaves ;
+    GLint uniformAmplitudes;
+    GLint uniformPhases;
+    GLint uniformFrequencies;
+    GLint uniformT;
+
 
     // Uniforms for the gouraud shader.
     GLint uniformModelViewTransformGouraud;
@@ -73,6 +79,13 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     QVector3D lightPosition = {1, 100, 1};
     QVector3D lightColour = {1, 1, 1};
 
+    // Water properties
+    int numwaves;
+    float *frequencies;
+    float *periods;
+    float *amplitudes;
+    float t = 0;
+
 public:
     enum ShadingMode : GLuint
     {
@@ -113,6 +126,7 @@ private:
     // Loads texture data into the buffer of texturePtr.
     void loadTextures();
     void loadTexture(QString file, GLuint texturePtr);
+    void initializeWaterProperties();
 
     void destroyModelBuffers();
 

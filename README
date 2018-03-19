@@ -1,5 +1,7 @@
 
-In this assignments we were ought to make objects move. For the first part, we succeeded to load 4 objects (2 cats and 2 spheres) and make them rotate around an axis. Also we were able to move the camera around the objects, and even succeeded in some user_input controls: zooming in and out using scrolling and dragging the mouse to move the camera around.
+In this assignments we were ought to make objects move. For the first part, we succeeded to load 4 objects (2 cats and 2 spheres) and make them rotate around an axis. Also we were able to move the camera around the objectsin two dimensions, and even succeeded in some user_input controls: zooming in and out using scrolling and dragging the mouse to move the camera around.
 
-For the water exercise we managed to apply a multiple of sinusses to make the water move. We weren't however, due to communication errors, able to implement the Gouraud and Phong shading. 
+For the water exercise we managed to apply a multiple of sinusses to make the water move. The phong shading is also implemented. The gouraud shading is disabled.
+The first shader program with the height map is not in the project, beause we lost the code.
+Proof of a working shader program with the height map can be found in the subdirectory Screenshots.
 

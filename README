@@ -1,8 +1,5 @@
-This is a README file
 
-When submitting your assignment, describe (briefly) the changes you made and what difficulties you encountered in this file.
+In this assignments we were ought to make objects move. For the first part, we succeeded to load 4 objects (2 cats and 2 spheres) and make them rotate around an axis. Also we were able to move the camera around the objects, and even succeeded in some user_input controls: zooming in and out using scrolling and dragging the mouse to move the camera around.
 
-Also describe what controls (key short-cuts, mouse clicks, mouse movement etc) and possible bonus assignments you implemented, so we can check them more easily.
-
-If you have any suggestions/feedback for improving the practical assignments or support from teaching assistants, you may include it here OR post in anonymously on Nestor under Feedback.
+For the water exercise we managed to apply a multiple of sinusses to make the water move. We weren't however, due to communication errors, able to implement the Gouraud and Phong shading. 
 

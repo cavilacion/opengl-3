@@ -153,6 +153,11 @@ void MainView::createShaderProgram()
     uniformLightPositionGouraud       = gouraudShaderProgram.uniformLocation("lightPosition");
     uniformLightColourGouraud         = gouraudShaderProgram.uniformLocation("lightColour");
     uniformTextureSamplerGouraud      = gouraudShaderProgram.uniformLocation("textureSampler");
+    uniformNumWavesGouraud = gouraudShaderProgram.uniformLocation("numwaves");
+    uniformAmplitudesGouraud = gouraudShaderProgram.uniformLocation("amplitude");
+    uniformPhasesGouraud = gouraudShaderProgram.uniformLocation("phase");
+    uniformFrequenciesGouraud = gouraudShaderProgram.uniformLocation("frequency");
+    uniformTGouraud = gouraudShaderProgram.uniformLocation("t");
 
     // Get the uniforms for the phong shader.
     uniformModelViewTransformPhong  = phongShaderProgram.uniformLocation("modelViewTransform");
@@ -162,6 +167,11 @@ void MainView::createShaderProgram()
     uniformLightPositionPhong       = phongShaderProgram.uniformLocation("lightPosition");
     uniformLightColourPhong         = phongShaderProgram.uniformLocation("lightColour");
     uniformTextureSamplerPhong      = phongShaderProgram.uniformLocation("textureSampler");
+    uniformNumWavesPhong = phongShaderProgram.uniformLocation("numwaves");
+    uniformAmplitudesPhong = phongShaderProgram.uniformLocation("amplitude");
+    uniformPhasesPhong = phongShaderProgram.uniformLocation("phase");
+    uniformFrequenciesPhong = phongShaderProgram.uniformLocation("frequency");
+    uniformTPhong = phongShaderProgram.uniformLocation("t");
 }
 
 void MainView::loadMesh()

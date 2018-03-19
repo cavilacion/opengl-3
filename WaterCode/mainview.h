@@ -48,6 +48,12 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
 
     GLint uniformTextureSamplerGouraud;
 
+    GLint uniformNumWavesGouraud ;
+    GLint uniformAmplitudesGouraud;
+    GLint uniformPhasesGouraud;
+    GLint uniformFrequenciesGouraud;
+    GLint uniformTGouraud;
+
     // Uniforms for the phong shader.
     GLint uniformModelViewTransformPhong;
     GLint uniformProjectionTransformPhong;
@@ -58,6 +64,12 @@ class MainView : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core {
     GLint uniformLightColourPhong;
 
     GLint uniformTextureSamplerPhong;
+
+    GLint uniformNumWavesPhong ;
+    GLint uniformAmplitudesPhong;
+    GLint uniformPhasesPhong;
+    GLint uniformFrequenciesPhong;
+    GLint uniformTPhong;
 
     // Buffers
     GLuint meshVAO;
